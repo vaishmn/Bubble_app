@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bubbles App</title>
+  <style>
+    /* Centering the entire page content */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh; /* Full viewport height */
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Wrapper to hold the canvas and buttons */
+    .wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      text-align: center; /* Title centered */
+      margin-bottom: 20px;
+    }
+
+    canvas {
+      border: 5px solid black; /* Thicker border */
+      margin-bottom: 20px;
+      width: 700px;  /* Increased width */
+      height: 400px; /* Increased height */
+    }
+
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <h1>Bubbles App</h1>
+    <canvas id="myCanvas" width="700" height="400"></canvas> <!-- Increased canvas size -->
+    <div>
+      <button id="hitButton">Hit</button>
+      <button id="resetButton">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('myCanvas');
+    const ctx = canvas.getContext('2d');
+    let arrowX = 600; // Adjusted arrow starting position due to larger canvas
+    let arrowY = 200; // Adjusted arrow Y position
+    const arrowSpeed = 5;
+    const circleRadius = 75; // Increased the circle size for larger canvas
+    const circleX = 150; // Center of the circle
+    const originalCircleColor = getRandomColor(); // Store the original color of the circle
+    let circleColor = originalCircleColor;
+    let arrowMoving = false;
+    let hitOccurred = false; // Track whether a hit has occurred
+
+    // Function to draw a circle on the left
+    function drawCircle() {
+      ctx.beginPath();
+      ctx.arc(circleX, 200, circleRadius, 0, Math.PI * 2); // Adjusted Y position to match larger canvas
+      ctx.fillStyle = circleColor;
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    // Function to draw an arrow on the right
+    function drawArrow() {
+      ctx.beginPath();
+      ctx.moveTo(arrowX, arrowY);
+      ctx.lineTo(arrowX - 100, arrowY); // Arrow body
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = 'black';
+      ctx.stroke();
+
+      ctx.beginPath(); // Arrow tip
+      ctx.moveTo(arrowX - 100, arrowY);
+      ctx.lineTo(arrowX - 90, arrowY - 10);
+      ctx.lineTo(arrowX - 90, arrowY + 10);
+      ctx.fillStyle = 'black';
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    // Function to draw both the circle and arrow
+    function drawScene() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+      drawCircle();
+      drawArrow();
+    }
+
+    // Function to get a random color
+    function getRandomColor() {
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+
+    // Function to update the arrow position
+    function updateArrowPosition() {
+      if (arrowMoving) {
+        // The arrow should stop when its tip touches the right edge of the circle
+        if (arrowX - 100 > circleX + circleRadius) {
+          arrowX -= arrowSpeed;
+        } else {
+          arrowMoving = false;
+          if (!hitOccurred) {
+            circleColor = getRandomColor(); // Change circle color only when the arrow actually hits the circle
+            hitOccurred = true; // Mark that a hit has occurred
+          }
+        }
+        drawScene();
+        requestAnimationFrame(updateArrowPosition);
+      }
+    }
+
+    // Hit button event listener
+    document.getElementById('hitButton').addEventListener('click', function () {
+      if (!arrowMoving && !hitOccurred) {
+        arrowMoving = true;
+        updateArrowPosition();
+      }
+    });
+
+    // Reset button event listener
+    document.getElementById('resetButton').addEventListener('click', function () {
+      arrowX = 600; // Reset arrow starting position for larger canvas
+      arrowMoving = false;
+      hitOccurred = false; // Reset the hitOccurred flag
+      circleColor = originalCircleColor; // Reset the circle's color to the original color
+      drawScene();
+    });
+
+    // Initial drawing
+    drawScene();
+  </script>
+</body>
+</html>
